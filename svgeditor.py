@@ -63,14 +63,14 @@ class SVGEditor:
         )
         btn_save.pack(side=tk.LEFT, padx=5)
         
-        # Add clear button
-        btn_clear = ttk.Button(
+        # Add center points button
+        btn_center = ttk.Button(
             button_frame,
-            text="Clear Points",
-            command=self.clear_points,
+            text="Center Points",
+            command=self.center_points,
             style='Action.TButton'
         )
-        btn_clear.pack(side=tk.LEFT, padx=5)
+        btn_center.pack(side=tk.LEFT, padx=5)
         
         # Create color selection frame
         color_frame = ttk.LabelFrame(main_frame, text="Style Settings", padding="5")
@@ -98,7 +98,7 @@ class SVGEditor:
         # Bind canvas events
         self.canvas.bind("<ButtonPress-1>", self.on_press)
         self.canvas.bind("<B1-Motion>", self.on_drag)
-        self.canvas.bind("<Double-Button-1>", self.on_double_click)  # Add double-click binding
+        self.canvas.bind("<Double-Button-1>", self.on_double_click)
         
         # Add help text
         help_text = ttk.Label(
@@ -119,11 +119,22 @@ class SVGEditor:
         )
         status_bar.pack(fill=tk.X, pady=(5, 0))
 
-    def clear_points(self):
-        """Clear all points from the polygon"""
-        self.points = []
+    def center_points(self):
+        """Center the polygon points around the origin (0,0)"""
+        if not self.points:
+            self.status_var.set("No points to center")
+            return
+            
+        # Calculate the centroid
+        x_coords, y_coords = zip(*self.points)
+        centroid_x = sum(x_coords) / len(self.points)
+        centroid_y = sum(y_coords) / len(self.points)
+        
+        # Subtract centroid from all points to center them around (0,0)
+        self.points = [(x - centroid_x, y - centroid_y) for x, y in self.points]
+        
         self.render_polygon()
-        self.status_var.set("All points cleared")
+        self.status_var.set(f"Centered points around origin (0,0)")
 
     def on_double_click(self, event):
         """Handle double-click event to add new points"""
